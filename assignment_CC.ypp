@@ -1,0 +1,145 @@
+%{
+     
+%}
+
+%code requires 
+{
+        #include<bits/stdc++.h>
+        #include"header_CC.h"
+        using namespace std;
+        int yylex();
+        int yyparse();
+        void yyerror(string s);
+}
+
+%union {int num; std::string *str;}         /* Yacc definitions */
+%start statement
+%token <str> oper small_oper
+%token assign
+%token small_assign
+%token to
+%token small_to
+%token in
+%token small_in
+%token is
+%token small_is
+%token <str> dir small_dir
+%token end_of_line
+%token value
+%token small_value 
+%token <str> identifier
+%token variable
+%token small_variable
+%token comma 
+%token stop
+%token <num> number
+%type <num> statement assignment move naming query incorrect_move wrong_statement correct_statement all_assign all_value all_variable all_to all_in all_is all_key
+%%
+
+statement: correct_statement{result($1);YYACCEPT;}
+        | wrong_statement  {printf("full stop is missing\n");fprintf(stderr,"-1\n");YYACCEPT;}
+        | incorrect_move stop end_of_line  {fprintf(stderr,"-1\n");YYACCEPT;}
+        | incorrect_move end_of_line  {printf("full stop is missing\n");fprintf(stderr,"-1\n");YYACCEPT;}
+        | error end_of_line {result(1);YYABORT;}
+        ;
+
+assignment  :assign number to number comma number  
+        ;
+
+move    : oper dir  
+        ;
+
+naming  : variable identifier is number comma number 
+        ;
+
+query   : value in number comma number 
+        ;
+
+correct_statement       : assign number to number comma number stop end_of_line {printf("assignment\n");$$ = assign_val($2,$4,$6);}
+                        | oper dir stop end_of_line {printf("move\n");move_perform($1,$2);$$=(int)0;}
+                        | variable identifier is number comma number stop end_of_line  {printf("naming\n");$$ = name_setter($2,$4,$6);}
+                        | variable small_is is number comma number stop end_of_line  {printf("naming\n");$$ = name_setter($2,$4,$6);}
+                        | variable small_is number comma number stop end_of_line  {printf("naming\n");$$ = name_setter($2,$4,$6);}
+                        | value in number comma number stop end_of_line  {printf("query\n");$$ = query_value($3,$5);}
+                        ;
+
+wrong_statement         : assignment end_of_line
+                        | move end_of_line
+                        | naming end_of_line
+                        | query end_of_line
+                        ;
+
+incorrect_move          : small_oper dir {printf("please use capital letters.\n");}
+                        | oper small_dir {printf("please use capital letters.\n");}
+                        | small_oper small_dir {printf("please use capital letters.\n");}
+                        | dir oper {printf("please use an operation before a direction.\n");}
+                        | small_dir dir_rev {printf("please use capital letters.\n");printf("please use an operation before a direction.\n");}
+                        | small_assign number all_to number comma number {printf("please use capital letters.\n");}
+                        | all_assign number small_to number comma number {printf("please use capital letters.\n");}
+                        | small_variable identifier all_is number comma number {printf("please use capital letters.\n");}
+                        | all_variable identifier small_is number comma number {printf("please use capital letters.\n");}
+                        | all_value small_in number comma number {printf("please use capital letters.\n");}
+                        | small_value all_in number comma number {printf("please use capital letters.\n");}
+                        | variable all_key is number comma number {printf("No, a keyword cannot be a variable name.\n");}
+                        | oper_rev small_oper {printf("please use capital letters.\n");printf("please use an operation before a direction.\n");}
+                        ;
+
+dir_rev   : oper | small_oper;
+
+oper_rev  : dir  | small_dir;
+
+all_assign : assign | small_assign
+
+all_value : value | small_value
+
+all_is : is | small_is
+
+all_to : to | small_to
+
+all_in : in | small_in
+
+all_variable : variable | small_variable
+
+all_key : assign | to | is | variable | value | in 
+
+extra     :     identifier extra
+                | assign extra
+                | small_assign extra
+                | to extra
+                | small_to extra
+                | is extra
+                | small_is extra
+                | in extra
+                | small_in extra
+                | dir extra
+                | small_dir extra
+                | oper extra
+                | small_oper extra
+                | value extra
+                | variable extra
+                | number extra
+                | dir
+                | small_dir
+                | oper
+                | small_oper
+                | identifier
+                | assign
+                | small_assign
+                | value
+                | small_value
+                | variable
+                | small_variable
+                | number
+                | to
+                | small_to
+                | is
+                | small_is
+                | in
+                | small_in
+                ;
+
+%%
+void yyerror(string s)
+{
+    printf("SYNTAX ERROR\n");
+}

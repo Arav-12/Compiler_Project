@@ -1,0 +1,59 @@
+%{
+    #include<bits/stdc++.h>
+    #include"assignment_CC.tab.hpp"
+    #include<string>
+    using namespace std;
+%}
+%option noyywrap
+%%
+"." {return stop;}
+
+","   {return comma;}
+
+"ADD"|"SUBTRACT"|"MULTIPLY"|"DIVIDE"   {yylval.str = new std::string(yytext);return oper;}
+                                            
+[Aa][Dd][Dd]|[Ss][Uu][Bb][Ss][Tt][Rr][Aa][Cc][Tt]|[Mm][Uu][Ll][Tt][Ii][Pp][Ll][Yy]|[Dd][Ii][Vv][Ii][Dd][Ee] {yylval.str = new std::string(yytext);return small_oper;}
+
+"LEFT"|"RIGHT"|"UP"|"DOWN"  {yylval.str = new std::string(yytext);return dir;}
+
+[Ll][Ee][Ff][Tt]|[Rr][Ii][Gg][Hh][Tt]|[Uu][Pp]|[Dd][Oo][Ww][Nn]  {yylval.str = new std::string(yytext);return small_dir;}
+
+
+"ASSIGN" {return assign;}
+
+[Aa][Ss][Ss][Ii][Gg][Nn] {return small_assign;}
+
+"VAR"   {return variable;}
+
+[Vv][Aa][Rr] {return small_variable;}
+
+
+"IS"    {return is;}
+
+[Ii][Ss] {return small_is;}
+
+"TO"    {return to;}
+
+[Tt][Oo] {return small_to;}
+
+
+"VALUE" {return value;}
+
+[Vv][Aa][Ll][Uu][Ee] {return small_value;}
+
+"IN"    {return in;}
+
+[Ii][Nn] {return small_in;}
+
+[0-9]+ {yylval.num = atoi(yytext);
+            return number;}
+
+[a-zA-Z0-9_\-@#\$%^&\*!\(\)\+\=\[\]\{\}\"\'\:\;\/\`\~\?\<\>]+ {yylval.str = new std::string(yytext);
+                                                                return identifier;}
+
+[\n] {return end_of_line;}
+
+[ \t]+ {;}
+
+.  {;}
+%%
